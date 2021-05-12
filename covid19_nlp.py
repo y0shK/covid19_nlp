@@ -19,10 +19,20 @@ pd.set_option('display.max_columns', None)
 
 # https://www.kaggle.com/datatattle/covid-19-nlp-text-classification
 
-tweets_train = pd.read_csv("Corona_NLP_train_utf8.csv")
-tweets_test = pd.read_csv("Corona_NLP_test_utf8.csv")
-print(tweets_test)
+march_tweets_train = pd.read_csv("Corona_NLP_train_utf8.csv")
+march_tweets_test = pd.read_csv("Corona_NLP_test_utf8.csv")
+# print(march_tweets_test)
 
 # https://www.kaggle.com/gpreda/covid19-tweets
 
+os.chdir("C:\\Users\\ynkar\\Desktop\\computational_health\\tweets_kaggle_Jul2020")
+
+july_tweets = pd.read_csv("covid19_tweets.csv")
+# print(july_tweets)
+
 # https://www.kaggle.com/gpreda/all-covid19-vaccines-tweets
+
+os.chdir("C:\\Users\\ynkar\\Desktop\\computational_health\\vaccination_tweets_kaggle")
+
+vaccine_tweets = pd.read_csv("vaccination_all_tweets.csv")
+print(vaccine_tweets)
