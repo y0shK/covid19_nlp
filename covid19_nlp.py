@@ -61,43 +61,44 @@ print(july_df)
 
 vaccine_df = vaccine_tweets[["id", "date", "text", "hashtags"]]
 
-# start by using rake-nltk to find key words
-r = Rake()
-
-# also perform sentiment analysis on each using vader
+# create method to obtain key words using rake-nltk
+# also perform sentiment analysis on each tweet using vader
 # https://www.geeksforgeeks.org/python-sentiment-analysis-using-vader/
 
-sid = SentimentIntensityAnalyzer()
+def get_key_words_march2020(length: int):
+    r = Rake()
+    sid = SentimentIntensityAnalyzer()
 
-#for i in range(len(march_df["OriginalTweet"])):
+    # store the user number as key and top 3 words by rake-nltk in a dictionary (hashTable)
+    keyword_dict = {}
 
-# store the user number (randomly generated) as key and top 3 words by rake-nltk
-# in a dictionary (hashTable)
+    for i in range(length):
+        r.extract_keywords_from_text(march_df["OriginalTweet"][i])
+        list_of_tuples = r.get_ranked_phrases_with_scores()
 
-keyword_dict = {}
+        # store the top three results of each user in a hashTable
+        # this provides quick lookup and convenient storage of data
+        # also store date of tweet
 
-for i in range(10):
-    r.extract_keywords_from_text(march_df["OriginalTweet"][i])
-    list_of_tuples = r.get_ranked_phrases_with_scores()
+        keyword_dict[march_df["UserName"][i]] = list_of_tuples[0:3]
+        keyword_dict[march_df["UserName"][i]].append(march_df["TweetAt"][i])
 
-    # store the top three results of each user in a hashTable
-    # this provides quick lookup and convenient storage of data
-    keyword_dict[march_df["UserName"][i]] = list_of_tuples[0:3]
+        sentiment_dict = sid.polarity_scores(march_df["OriginalTweet"][i])
 
-for i in range(10):
-    sentiment_dict = sid.polarity_scores(march_df["OriginalTweet"][i])
+        sentiment = ""
+        if sentiment_dict['compound'] > 0.05:
+            sentiment = "Positive"
+        elif sentiment_dict['compound'] < -0.05:
+            sentiment = "Negative"
+        else:
+            sentiment = "Neutral"
 
-    sentiment = ""
-    if sentiment_dict['compound'] > 0.05:
-        sentiment = "Positive"
-    elif sentiment_dict['compound'] < -0.05:
-        sentiment = "Negative"
-    else:
-        sentiment = "Neutral"
+        # add vader sentiment to the list of tuples in keyword dictionary
+        keyword_dict[march_df["UserName"][i]].append(sentiment)
 
-    # add vader sentiment to the list of tuples in keyword dictionary
-    keyword_dict[march_df["UserName"][i]].append(sentiment)
+    print(keyword_dict)
 
-print(keyword_dict)
+def get_key_words_july2020():
+    pass
 
-# what are the key words or phrases coming from the data?
+get_key_words_march2020(20)
