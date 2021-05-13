@@ -65,7 +65,7 @@ vaccine_df = vaccine_tweets[["id", "date", "text", "hashtags"]]
 # also perform sentiment analysis on each tweet using vader
 # https://www.geeksforgeeks.org/python-sentiment-analysis-using-vader/
 
-def get_key_words_march2020(length: int):
+def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str):
     r = Rake()
     sid = SentimentIntensityAnalyzer()
 
@@ -73,17 +73,17 @@ def get_key_words_march2020(length: int):
     keyword_dict = {}
 
     for i in range(length):
-        r.extract_keywords_from_text(march_df["OriginalTweet"][i])
+        r.extract_keywords_from_text(df[tweet][i])
         list_of_tuples = r.get_ranked_phrases_with_scores()
 
         # store the top three results of each user in a hashTable
         # this provides quick lookup and convenient storage of data
         # also store date of tweet
 
-        keyword_dict[march_df["UserName"][i]] = list_of_tuples[0:3]
-        keyword_dict[march_df["UserName"][i]].append(march_df["TweetAt"][i])
+        keyword_dict[df[id][i]] = list_of_tuples[0:3]
+        keyword_dict[df[id][i]].append(df[time][i])
 
-        sentiment_dict = sid.polarity_scores(march_df["OriginalTweet"][i])
+        sentiment_dict = sid.polarity_scores(df[tweet][i])
 
         sentiment = ""
         if sentiment_dict['compound'] > 0.05:
@@ -94,11 +94,10 @@ def get_key_words_march2020(length: int):
             sentiment = "Neutral"
 
         # add vader sentiment to the list of tuples in keyword dictionary
-        keyword_dict[march_df["UserName"][i]].append(sentiment)
+        keyword_dict[df[id][i]].append(sentiment)
 
     print(keyword_dict)
 
-def get_key_words_july2020():
-    pass
-
-get_key_words_march2020(20)
+get_key_words(march_df, 20, "OriginalTweet", "UserName", "TweetAt")
+get_key_words(july_df, 10, "text", "id", "date")
+get_key_words(vaccine_df, 10, "text", "id", "date")
