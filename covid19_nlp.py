@@ -84,8 +84,20 @@ for i in range(10):
     # this provides quick lookup and convenient storage of data
     keyword_dict[march_df["UserName"][i]] = list_of_tuples[0:3]
 
+for i in range(10):
     sentiment_dict = sid.polarity_scores(march_df["OriginalTweet"][i])
-    print(sentiment_dict)
-    print("\n")
+
+    sentiment = ""
+    if sentiment_dict['compound'] > 0.05:
+        sentiment = "Positive"
+    elif sentiment_dict['compound'] < -0.05:
+        sentiment = "Negative"
+    else:
+        sentiment = "Neutral"
+
+    # add vader sentiment to the list of tuples in keyword dictionary
+    keyword_dict[march_df["UserName"][i]].append(sentiment)
 
 print(keyword_dict)
+
+# what are the key words or phrases coming from the data?
