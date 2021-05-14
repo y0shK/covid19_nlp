@@ -65,7 +65,10 @@ vaccine_df = vaccine_tweets[["id", "date", "text", "hashtags"]]
 # also perform sentiment analysis on each tweet using vader
 # https://www.geeksforgeeks.org/python-sentiment-analysis-using-vader/
 
-def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str):
+# we can get key words with or without scores
+# https://towardsdatascience.com/extracting-keyphrases-from-text-rake-and-gensim-in-python-eefd0fad582f
+
+def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str, score_boolean: bool):
     r = Rake()
     sid = SentimentIntensityAnalyzer()
 
@@ -74,13 +77,17 @@ def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str):
 
     for i in range(length):
         r.extract_keywords_from_text(df[tweet][i])
-        list_of_tuples = r.get_ranked_phrases_with_scores()
+
+        if score_boolean:
+            provided_words = r.get_ranked_phrases_with_scores()
+        else:
+            provided_words = r.get_ranked_phrases()
 
         # store the top three results of each user in a hashTable
         # this provides quick lookup and convenient storage of data
         # also store date of tweet
 
-        keyword_dict[df[id][i]] = list_of_tuples[0:3]
+        keyword_dict[df[id][i]] = provided_words[0:3]
         keyword_dict[df[id][i]].append(df[time][i])
 
         sentiment_dict = sid.polarity_scores(df[tweet][i])
@@ -98,6 +105,12 @@ def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str):
 
     print(keyword_dict)
 
-get_key_words(march_df, 20, "OriginalTweet", "UserName", "TweetAt")
-get_key_words(july_df, 10, "text", "id", "date")
-get_key_words(vaccine_df, 10, "text", "id", "date")
+get_key_words(march_df, 20, "OriginalTweet", "UserName", "TweetAt", True)
+get_key_words(july_df, 10, "text", "id", "date", True)
+get_key_words(vaccine_df, 10, "text", "id", "date", True)
+
+print("")
+
+get_key_words(march_df, 10, "OriginalTweet", "UserName", "TweetAt", False)
+get_key_words(july_df, 10, "text", "id", "date", False)
+get_key_words(vaccine_df, 10, "text", "id", "date", False)
