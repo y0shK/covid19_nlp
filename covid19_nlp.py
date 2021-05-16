@@ -87,7 +87,53 @@ def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str, scor
         # this provides quick lookup and convenient storage of data
         # also store date of tweet
 
-        keyword_dict[df[id][i]] = provided_words[0:3]
+        # make sure that none of the top three results are or have "https ://" or ". co"
+
+        # score_boolean = false
+        if not score_boolean:
+            top_three = []
+            for j in range(len(provided_words)):
+                # case where the result is just the string to be removed
+                if provided_words[j] == "https ://" or provided_words[j] == ". co":
+                    pass
+                # case where the result needs to remove the substring
+                elif "https ://" in provided_words[j]:
+                    index_to_split = provided_words[j].find("https ://")
+                    top_three.append(provided_words[j][0:index_to_split - 1])
+                elif ". co" in provided_words[j]:
+                    index_to_split = provided_words[j].find(". co")
+                    top_three.append(provided_words[j][0:index_to_split - 1])
+                else:
+                    top_three.append(provided_words[j])
+
+                # if we have the top three words, we can break
+                if len(top_three) >= 3:
+                    break
+        else:
+            # this is the case where score_boolean is true and we just want the string of the tuple
+            # which is tuple[1], while the score is tuple[0]
+            top_three = []
+            for j in range(len(provided_words)):
+                # case where the result is just the string to be removed
+                if provided_words[j][1] == "https ://" or provided_words[j][1] == ". co":
+                    pass
+                # case where the result needs to remove the substring
+                elif "https ://" in provided_words[j][1]:
+                    index_to_split = provided_words[j][1].find("https ://")
+                    top_three.append(provided_words[j][1][0:index_to_split - 1])
+                elif ". co" in provided_words[j][1]:
+                    index_to_split = provided_words[j][1].find(". co")
+                    top_three.append(provided_words[j][1][0:index_to_split - 1])
+                else:
+                    top_three.append(provided_words[j])
+
+                # if we have the top three words, we can break
+                if len(top_three) >= 3:
+                    break
+
+        # we now have the top three words for each unidentified user
+        keyword_dict[df[id][i]] = top_three
+
         keyword_dict[df[id][i]].append(df[time][i])
 
         sentiment_dict = sid.polarity_scores(df[tweet][i])
@@ -109,7 +155,7 @@ get_key_words(march_df, 20, "OriginalTweet", "UserName", "TweetAt", True)
 get_key_words(july_df, 10, "text", "id", "date", True)
 get_key_words(vaccine_df, 10, "text", "id", "date", True)
 
-print("")
+print(" ")
 
 get_key_words(march_df, 10, "OriginalTweet", "UserName", "TweetAt", False)
 get_key_words(july_df, 10, "text", "id", "date", False)
