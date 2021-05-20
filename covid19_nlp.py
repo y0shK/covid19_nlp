@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from rake_nltk import Rake
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import nltk
 from textblob import TextBlob
 
 # general research area: gauging people's reactions to COVID-19 over time
@@ -160,3 +161,28 @@ print(" ")
 get_key_words(march_df, 10, "OriginalTweet", "UserName", "TweetAt", False)
 get_key_words(july_df, 10, "text", "id", "date", False)
 get_key_words(vaccine_df, 10, "text", "id", "date", False)
+
+# get frequency distribution using nltk
+# https://stackoverflow.com/questions/46786211/counting-the-frequency-of-words-in-a-pandas-data-frame
+march_tweets_column = march_df["OriginalTweet"].str.lower().str.cat(sep=" ")
+march_words = nltk.tokenize.word_tokenize(march_tweets_column)
+march_word_dist = nltk.FreqDist(march_words)
+# print(march_word_dist)
+
+# TODO make arbitrary number into a method parameter
+march_nltk_result = pd.DataFrame(march_word_dist.most_common(100),
+                    columns=['Word', 'Frequency'])
+# print(march_nltk_result)
+
+march_word_dict = {}
+# for word in march_nltk_result["Word"]:
+  #  if word.isalnum() and word not in articles_to_avoid:
+   #     march_word_dict[word] = 0
+
+# https://python-reference.readthedocs.io/en/latest/docs/str/isalnum.html
+# https://stackoverflow.com/questions/15125343/how-to-iterate-through-two-pandas-columns
+for word, freq in zip(march_nltk_result["Word"], march_nltk_result["Frequency"]):
+    if word.isalnum():
+        march_word_dict[word] = freq
+
+print(march_word_dict)
