@@ -69,7 +69,8 @@ vaccine_df = vaccine_tweets[["id", "date", "text", "hashtags"]]
 # we can get key words with or without scores
 # https://towardsdatascience.com/extracting-keyphrases-from-text-rake-and-gensim-in-python-eefd0fad582f
 
-def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str, score_boolean: bool):
+# return None - this method only prints
+def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str, score_boolean: bool) -> None:
     r = Rake()
     sid = SentimentIntensityAnalyzer()
 
@@ -152,37 +153,73 @@ def get_key_words(df: pd.DataFrame, length: int, tweet: str, id, time: str, scor
 
     print(keyword_dict)
 
-get_key_words(march_df, 20, "OriginalTweet", "UserName", "TweetAt", True)
-get_key_words(july_df, 10, "text", "id", "date", True)
-get_key_words(vaccine_df, 10, "text", "id", "date", True)
+#get_key_words(march_df, 20, "OriginalTweet", "UserName", "TweetAt", True)
+#get_key_words(july_df, 10, "text", "id", "date", True)
+#get_key_words(vaccine_df, 10, "text", "id", "date", True)
 
 print(" ")
 
-get_key_words(march_df, 10, "OriginalTweet", "UserName", "TweetAt", False)
-get_key_words(july_df, 10, "text", "id", "date", False)
-get_key_words(vaccine_df, 10, "text", "id", "date", False)
+#get_key_words(march_df, 10, "OriginalTweet", "UserName", "TweetAt", False)
+#get_key_words(july_df, 10, "text", "id", "date", False)
+#get_key_words(vaccine_df, 10, "text", "id", "date", False)
 
 # get frequency distribution using nltk
+# create a method that generalizes and prints the frequency distribution
 # https://stackoverflow.com/questions/46786211/counting-the-frequency-of-words-in-a-pandas-data-frame
-march_tweets_column = march_df["OriginalTweet"].str.lower().str.cat(sep=" ")
-march_words = nltk.tokenize.word_tokenize(march_tweets_column)
-march_word_dist = nltk.FreqDist(march_words)
-# print(march_word_dist)
 
-# TODO make arbitrary number into a method parameter
-march_nltk_result = pd.DataFrame(march_word_dist.most_common(100),
-                    columns=['Word', 'Frequency'])
-# print(march_nltk_result)
+# return None - this method only prints
+def get_word_freq(df: pd.DataFrame, length: int, tweet: str, common_filter_bool: bool) -> None:
+    col = df[tweet].str.lower().str.cat(sep=" ")
+    words = nltk.tokenize.word_tokenize(col)
+    word_dist = nltk.FreqDist(words)
+    # print(word_dist)
 
-march_word_dict = {}
-# for word in march_nltk_result["Word"]:
-  #  if word.isalnum() and word not in articles_to_avoid:
-   #     march_word_dict[word] = 0
+    result = pd.DataFrame(word_dist.most_common(length),
+                          columns=["Word", "Frequency"])
+    # print(result)
 
-# https://python-reference.readthedocs.io/en/latest/docs/str/isalnum.html
-# https://stackoverflow.com/questions/15125343/how-to-iterate-through-two-pandas-columns
-for word, freq in zip(march_nltk_result["Word"], march_nltk_result["Frequency"]):
-    if word.isalnum():
-        march_word_dict[word] = freq
+    word_dict = {}
 
-print(march_word_dict)
+    # create a common word filter to eliminate articles, conjunctions, prepositions, etc.
+    # and words like "https"
+
+    common_filter = []
+    articles = ["a", "an", "the"]
+    conjunctions = ["for", "and", "nor", "but", "or", "yet", "so"]
+    common_verbs = ["is", "are"]
+    common_nouns = ["this", "that"]
+    common_phrases = ["i", "you", "they", "their", "our", "we", "us"]
+    other_words = ["https", ".co"]
+
+    # https://stackoverflow.com/questions/328059/create-a-list-that-contain-each-line-of-a-file
+    os.chdir("C:\\Users\\ynkar\\Desktop\\computational_health")
+    prepositions = open("prepositions.txt").read().splitlines()
+
+    common_filter += articles
+    common_filter += conjunctions
+    common_filter += prepositions
+    common_filter += common_verbs
+    common_filter += common_nouns
+    common_filter += common_phrases
+    common_filter += other_words
+
+    # https://python-reference.readthedocs.io/en/latest/docs/str/isalnum.html
+    # https://stackoverflow.com/questions/15125343/how-to-iterate-through-two-pandas-columns
+    for word, freq in zip(result["Word"], result["Frequency"]):
+
+        if common_filter_bool:
+            if word.isalnum() and word not in common_filter:
+                word_dict[word] = freq
+        else:
+            if word.isalnum():
+                word_dict[word] = freq
+
+    print(word_dict)
+
+get_word_freq(march_df, 100, "OriginalTweet", False)
+get_word_freq(july_df, 100, "text", False)
+get_word_freq(vaccine_df, 100, "text", False)
+
+get_word_freq(march_df, 100, "OriginalTweet", True)
+get_word_freq(july_df, 100, "text", True)
+get_word_freq(vaccine_df, 100, "text", True)
